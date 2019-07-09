@@ -10,7 +10,6 @@
  */
 package com.hxq.newordersystem.entity;
 
-import javax.persistence.Entity;
 import java.io.Serializable;
 import java.util.List;
 
@@ -22,7 +21,7 @@ import java.util.List;
  * @create 2019/7/9
  * @since 1.0.0
  */
-@Entity
+
 public class CateFish implements Serializable{
 
     /**
