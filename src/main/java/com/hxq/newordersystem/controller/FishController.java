@@ -10,13 +10,17 @@
  */
 package com.hxq.newordersystem.controller;
 
+import com.hxq.newordersystem.entity.CateFish;
+import com.hxq.newordersystem.entity.Category;
 import com.hxq.newordersystem.entity.Fish;
+import com.hxq.newordersystem.repository.CategoryRepository;
 import com.hxq.newordersystem.repository.FishRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
@@ -34,6 +38,8 @@ public class FishController {
     @Autowired
     private FishRepository fishRepository;
 
+    @Autowired
+    private CategoryRepository categoryRepository;
 
     /**
      * Web端
@@ -44,12 +50,31 @@ public class FishController {
      * @return
      */
    // @ResponseBody
+//    @GetMapping("/findallfish")
+//    public String findAll(Model model){
+//        List<Fish> fishs=fishRepository.findAll();
+//        model.addAttribute("fishlist",fishs);
+//        return "查询所有菜品的页面";
+//       // System.out.println(fishs);
+//        //return fishs.toString();
+//    }
     @GetMapping("/findallfish")
     public String findAll(Model model){
-        List<Fish> fishs=fishRepository.findAll();
-        model.addAttribute("fishlist",fishs);
+        ArrayList<CateFish> cateFishList=new ArrayList<CateFish>();
+        List<Category> categoryList=categoryRepository.findAll();
+        for (Category category:categoryList){
+            //存分类
+            CateFish cateFish=new CateFish();
+            cateFish.setCategory(category);
+            //找分类的菜
+            List<Fish> fishs=fishRepository.findAllByCategory(category.getName());
+            //存分类的菜
+            cateFish.setFishList(fishs);
+            cateFishList.add(cateFish);
+        }
+        model.addAttribute("catefishlist",cateFishList);
         return "查询所有菜品的页面";
-       // System.out.println(fishs);
+        // System.out.println(fishs);
         //return fishs.toString();
     }
 
