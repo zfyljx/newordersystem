@@ -144,10 +144,10 @@ public class OrderForController {
      * 在订单详情中删除一道菜，更新订单的总价
      * 前端请求href为/deleteorderfish/{id}，请求方式为get
      *返回值为重定向到一个订单详情页面
+     * 已测试接口，测试成功
      * @param orderFishId
      * @return
      */
-   // @ResponseBody
     @GetMapping("/deleteorderfish/{id}")
     public String deleteOrderFish(@PathVariable("id")Integer orderFishId){
         //找出待删除的订单里的那道菜
