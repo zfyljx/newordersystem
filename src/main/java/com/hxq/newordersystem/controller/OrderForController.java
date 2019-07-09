@@ -10,9 +10,11 @@
  */
 package com.hxq.newordersystem.controller;
 
+import com.hxq.newordersystem.entity.Fish;
 import com.hxq.newordersystem.entity.OrderFish;
 import com.hxq.newordersystem.entity.OrderFor;
 import com.hxq.newordersystem.entity.OrderForFish;
+import com.hxq.newordersystem.repository.FishRepository;
 import com.hxq.newordersystem.repository.OrderFishRepository;
 import com.hxq.newordersystem.repository.OrderForRepository;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -41,6 +43,10 @@ public class OrderForController {
 
     @Autowired
     private OrderFishRepository orderFishRepository;
+
+    @Autowired
+    private FishRepository fishRepository;
+
 
 
     /**
@@ -222,6 +228,77 @@ public class OrderForController {
     }
 
 
+    /**
+     * Web端
+     * 再次点菜
+     * 在订单管理管理中点击点菜按钮
+     * 前端请求为/showaddotherfish/{id}，需要提交一个订单id,请求方式是GET
+     * 重定向到一个返回所有菜的界面
+     * 已测试接口，成功
+     * @param id
+     * @param model
+     * @return
+     */
+    //@ResponseBody
+    @GetMapping("/showaddotherfish/{id}")
+    public String showAllFish(@PathVariable("id")Integer id,Model model){
+        model.addAttribute("orderId",id);
+        return "redirect:/findalladd";
+    }
+
+    /**
+     * Web端
+     * 再次点菜的功能
+     * 在显示所有菜的页面中，选择某道菜，修改数量，点击添加按钮
+     * 前端以form表单请求，需要提交订单id,点的菜的id，和点的数量，请求方式以post方式请求
+     * 重定向到显示所有菜品的页面，再次点菜
+     * 已测试接口，成功
+     * @param orderForId
+     * @param fishId
+     * @param count
+     * @return
+     */
+    //@ResponseBody
+    @PostMapping("/addorderfish")
+    public String addOtherFish(@RequestParam(value = "orderForId")Integer orderForId,
+                               @RequestParam(value = "fishId")Integer fishId,
+                               @RequestParam(value = "count")Integer count){
+        //找出所添加的那道菜
+        Optional<Fish> fishOptional=fishRepository.findById(fishId);
+        //找到订单
+        Optional<OrderFor> orderForOptional=orderForRepository.findById(orderForId);
+        //存入订单里的菜
+        OrderFish orderFish=new OrderFish();
+        orderFish.setCount(count);
+        orderFish.setFishId(fishId);
+        orderFish.setFishName(fishOptional.get().getName());
+        orderFish.setOrderId(orderForId);
+        orderFish.setPrice(fishOptional.get().getPrice());
+        orderFishRepository.save(orderFish);
+        //修改订单里的总价
+        OrderFor orderFor=orderForOptional.get();
+        Float sum=orderFor.getSum();
+        sum=sum+orderFish.getPrice()*count;
+        orderFor.setSum(sum);
+        orderForRepository.save(orderFor);
+        return "redirect:/findalladd";
+    }
+
+    /**
+     * Web端
+     * 点完菜之后的操作
+     * 在显示所有的菜品的页面点击结束按钮，需要传一个订单（OrderFor）id
+     * 前端请求href为/finishadd/{id},请求方式为get
+     * 返回到显示一个订单管理的页面
+     * 已测试接口，成功
+     * @param id
+     * @return
+     */
+    //@ResponseBody
+    @GetMapping("/finishadd/{id}")
+    public String finishAdd(@PathVariable("id")Integer id){
+        return "redirect:/findoneorderforfish/"+id+"";//重定向到通过订单id显示订单详情的页面
+    }
 
 }
 

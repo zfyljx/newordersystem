@@ -78,6 +78,46 @@ public class FishController {
         //return fishs.toString();
     }
 
+
+    /**
+     * Web端
+     * 订单中再次点菜的功能
+     * 显示所有可以点的菜
+     * 方法的映射/findallAdd，拿到所有的菜品list存放到Model中取名为{catefishlist}，返回到页面显示
+     * 已测试接口，成功
+     * @param model
+     * @return
+     */
+    // @ResponseBody
+//    @GetMapping("/findallfish")
+//    public String findAll(Model model){
+//        List<Fish> fishs=fishRepository.findAll();
+//        model.addAttribute("fishlist",fishs);
+//        return "查询所有菜品的页面";
+//       // System.out.println(fishs);
+//        //return fishs.toString();
+//    }
+    //@ResponseBody
+    @GetMapping("/findalladd")
+    public String findAllAdd(Model model){
+        ArrayList<CateFish> cateFishList=new ArrayList<CateFish>();
+        List<Category> categoryList=categoryRepository.findAll();
+        for (Category category:categoryList){
+            //存分类
+            CateFish cateFish=new CateFish();
+            cateFish.setCategory(category);
+            //找分类的菜
+            List<Fish> fishs=fishRepository.findAllByCategory(category.getName());
+            //存分类的菜
+            cateFish.setFishList(fishs);
+            cateFishList.add(cateFish);
+        }
+        model.addAttribute("catefishlist",cateFishList);
+        return "返回到一个显示所有菜的界面";
+        // System.out.println(fishs);
+        //return fishs.toString();
+    }
+
     /**
      * 用于小程序中的
      * 请求所有菜品，
