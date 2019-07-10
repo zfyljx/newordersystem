@@ -54,6 +54,25 @@ public class CategoryController {
     }
 
     /**
+     * 小程序端
+     * 找到所有的菜品分类
+     * 前端href为/findallcategory。请求方式是Get
+     * 得到的所有菜品分类集合存入model,取名为{categorylist}
+     * 返回一个显示所有分类的页面
+     * 已测试接口，成功
+     * @param model
+     * @return
+     */
+    @ResponseBody
+    @GetMapping("/wx/findallcategory")
+    public List<Category> findAllWx(Model model){
+        List<Category> categories=categoryRepository.findAll();
+        //System.out.println(categories);
+        model.addAttribute("categorylist",categories);
+        return categories;
+    }
+
+    /**
      * Web端
      * 添加一个分类
      * 前端form表单提交数据，有一个属性为name，请求的方式为post

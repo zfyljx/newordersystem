@@ -58,6 +58,8 @@ public class Fish {
      */
     private String category;
 
+    private Integer count;
+
     public Integer getId() {
         return id;
     }
@@ -116,6 +118,14 @@ public class Fish {
                 ", price=" + price +
                 ", category='" + category + '\'' +
                 '}';
+    }
+
+    public Integer getCount() {
+        return count;
+    }
+
+    public void setCount(Integer count) {
+        this.count = count;
     }
 }
 

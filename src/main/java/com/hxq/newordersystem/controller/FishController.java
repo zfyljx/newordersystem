@@ -127,8 +127,20 @@ public class FishController {
      */
     @ResponseBody
     @GetMapping("/fish/findall")
-    public List<Fish> findAllFish(){
-        return fishRepository.findAll();
+    public List<CateFish> findAllFish(){
+        ArrayList<CateFish> cateFishList=new ArrayList<CateFish>();
+        List<Category> categoryList=categoryRepository.findAll();
+        for (Category category:categoryList){
+            //存分类
+            CateFish cateFish=new CateFish();
+            cateFish.setCategory(category);
+            //找分类的菜
+            List<Fish> fishs=fishRepository.findAllByCategory(category.getName());
+            //存分类的菜
+            cateFish.setFishList(fishs);
+            cateFishList.add(cateFish);
+        }
+        return cateFishList;
     }
 
 

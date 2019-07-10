@@ -37,6 +37,11 @@ public class Category {
      */
     private String name;
 
+    private String icon;
+    private String icon1;
+    private String icon2;
+
+    private String tag;
     public Integer getId() {
         return id;
     }
@@ -59,6 +64,38 @@ public class Category {
                 "id=" + id +
                 ", name='" + name + '\'' +
                 '}';
+    }
+
+    public String getIcon() {
+        return icon;
+    }
+
+    public void setIcon(String icon) {
+        this.icon = icon;
+    }
+
+    public String getIcon1() {
+        return icon1;
+    }
+
+    public void setIcon1(String icon1) {
+        this.icon1 = icon1;
+    }
+
+    public String getIcon2() {
+        return icon2;
+    }
+
+    public void setIcon2(String icon2) {
+        this.icon2 = icon2;
+    }
+
+    public String getTag() {
+        return tag;
+    }
+
+    public void setTag(String tag) {
+        this.tag = tag;
     }
 }
 

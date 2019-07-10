@@ -34,6 +34,7 @@ public class CateFish implements Serializable{
      */
     private List<Fish> fishList;
 
+
     public Category getCategory() {
         return category;
     }
@@ -57,5 +58,6 @@ public class CateFish implements Serializable{
                 ", fishList=" + fishList.toString() +
                 '}';
     }
+
 }
 

@@ -18,9 +18,12 @@ import net.sf.json.JSONObject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.RestController;
 
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
@@ -147,9 +150,19 @@ public class UserController {
             if (null != result && result.length() > 0) {
                 map.put("status", 1);
                 map.put("msg", "解密成功");
-
                 JSONObject userInfoJSON = JSONObject.fromObject(result);
+
+                //存数据
+                User user=new User();
+                user.setOpenId(userInfoJSON.get("openId").toString());
+                List<User> userList=userRepository.findAll();
+                Optional<User> userOptional=userRepository.findByOpenId(userInfoJSON.get("openId").toString());
+                if (!userOptional.isPresent()) {
+                    userRepository.save(user);
+                }
+                Optional<User> userOptional1=userRepository.findByOpenId(userInfoJSON.get("openId").toString());
                 Map userInfo = new HashMap();
+                userInfo.put("userId",userOptional1.get().getId());
                 userInfo.put("openId", userInfoJSON.get("openId"));
                 userInfo.put("nickName", userInfoJSON.get("nickName"));
                 userInfo.put("gender", userInfoJSON.get("gender"));

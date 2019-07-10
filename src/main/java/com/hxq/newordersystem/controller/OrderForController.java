@@ -17,15 +17,15 @@ import com.hxq.newordersystem.entity.OrderForFish;
 import com.hxq.newordersystem.repository.FishRepository;
 import com.hxq.newordersystem.repository.OrderFishRepository;
 import com.hxq.newordersystem.repository.OrderForRepository;
+import net.sf.json.JSONArray;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 
 import javax.servlet.http.HttpServletRequest;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Optional;
+import java.text.SimpleDateFormat;
+import java.util.*;
 
 /**
  * 〈一句话功能简述〉<br> 
@@ -48,11 +48,62 @@ public class OrderForController {
     private FishRepository fishRepository;
 
 
-
     /**
-     * 差一个从小程序传值过来的订单
+     * 小程序端
+     * 从小程序传输订单过来
+     * 小程序中的数据需转化为String：fishlist:JSON.stringify（fishlist）
+     * 请求方式是Post。请求路径为url+/orderfor/orderfish
+     * "Content-Type": "application/x-www-form-urlencoded"
+     * @param userId 用户id
+     * @param tableNumber 桌号
+     * @param number 人数
+     * @param fishList 订单菜的链表
+     * @return
      */
+    @ResponseBody
+    @PostMapping("/orderfor/orderfish")
+     public Map getOrderForFishFromVX(@RequestParam("userid")String userId,
+                                      @RequestParam("tableNumber")Integer tableNumber,
+                                      @RequestParam("number")Integer number,
+                                      @RequestParam("fishlist")String fishList){
+         Map map=new HashMap();
+         //存订单
+         OrderFor orderFor=new OrderFor();
+         orderFor.setNumber(number);
+         orderFor.setTableNumber(tableNumber);
+         orderFor.setUserId(Integer.valueOf(userId));
+         orderFor.setState("未支付");
+         String s=new java.text.SimpleDateFormat("yyyy-MM-dd HH:mm:ss").format(new Date());
+         Date date=null;
+         try {
+             SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+             date=sdf.parse(s);
+         }catch (Exception e){
+             e.printStackTrace();
+         }
+         orderFor.setOrderTime(date);
+         //获取出订单id
+         OrderFor u=orderForRepository.save(orderFor);
+         //String 转换成 集合  前端数组转换String
+         JSONArray jsonlist = JSONArray.fromObject(fishList);
+         List<OrderFish> orderFishList=(List<OrderFish>) JSONArray.toCollection(jsonlist,OrderFish.class);
+          //存菜
+         Float sum=0f;
+         for (OrderFish orderFish:orderFishList){
+             orderFish.setOrderId(u.getId());
+             orderFishRepository.save(orderFish);
+             sum=sum+(orderFish.getPrice()*orderFish.getCount());
+         }
+         //存订单的总价
+         u.setSum(sum);
+         orderForRepository.save(u);
 
+         map.put("status", 1);
+         map.put("msg", "下单成功");
+
+         return map;
+
+     }
 
     /**
      * Web端
