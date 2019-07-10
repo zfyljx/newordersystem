@@ -12,14 +12,13 @@ package com.hxq.newordersystem.controller;
 
 import com.hxq.newordersystem.entity.User;
 import com.hxq.newordersystem.repository.UserRepository;
+import com.hxq.newordersystem.utils.AesCbcUtil;
 import com.hxq.newordersystem.utils.HttpRequest;
 import net.sf.json.JSONObject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -98,6 +97,78 @@ public class UserController {
             map.put("msg", "找不到openid");
             return map;
         }
+    }
+
+    /**
+     * decoding encrypted data to get openid
+     *
+     * @param iv
+     * @param encryptedData
+     * @param code
+     * @return
+     */
+    @PostMapping(value = "/decodeUserInfo")
+    private Map decodeUserInfo(@RequestParam("iv") String iv,
+                               @RequestParam("encryptedData")String encryptedData,
+                               @RequestParam("code") String code) {
+        Map map = new HashMap();
+        // login code can not be null
+        if (code == null || code.length() == 0) {
+            map.put("status", 0);
+            map.put("msg", "code 不能为空");
+            return map;
+        }
+        // mini-Program's AppID
+        String wechatAppId = "wx62f70ec6c4379bef";
+
+        // mini-Program's session-key
+        String wechatSecretKey = "90f4bdbb9289f7002bae585903d6eebe";
+
+        String grantType = "authorization_code";
+
+        // using login code to get sessionId and openId
+        String params = "appid=" + wechatAppId + "&secret=" + wechatSecretKey + "&js_code=" + code + "&grant_type=" + grantType;
+
+        // sending request
+        String sr = HttpRequest.sendGet("https://api.weixin.qq.com/sns/jscode2session", params);
+
+        // analysis request content
+        JSONObject json = JSONObject.fromObject(sr);
+
+        // getting session_key
+        String sessionKey = json.get("session_key").toString();
+
+        // getting open_id
+        String openId = json.get("openid").toString();
+
+        // decoding encrypted info with AES
+        try {
+            String result = AesCbcUtil.decrypt(encryptedData, sessionKey, iv, "UTF-8");
+            if (null != result && result.length() > 0) {
+                map.put("status", 1);
+                map.put("msg", "解密成功");
+
+                JSONObject userInfoJSON = JSONObject.fromObject(result);
+                Map userInfo = new HashMap();
+                userInfo.put("openId", userInfoJSON.get("openId"));
+                userInfo.put("nickName", userInfoJSON.get("nickName"));
+                userInfo.put("gender", userInfoJSON.get("gender"));
+                userInfo.put("city", userInfoJSON.get("city"));
+                userInfo.put("province", userInfoJSON.get("province"));
+                userInfo.put("country", userInfoJSON.get("country"));
+                userInfo.put("avatarUrl", userInfoJSON.get("avatarUrl"));
+                userInfo.put("unionId", userInfoJSON.get("unionId"));
+                map.put("userInfo", userInfo);
+                return map;
+            }
+
+
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        map.put("status", 0);
+        map.put("msg", "解密失败");
+        return map;
     }
 }
 
